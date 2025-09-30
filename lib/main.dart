@@ -22,16 +22,27 @@ class EggTimerApp extends StatelessWidget {
       home: const StartScreen(),
     );
   }
-}
+}// 🔊 Player global para o som de done
+AudioPlayer? _donePlayer;
 
 Future<void> playSound(String assetPath) async {
   try {
     final player = AudioPlayer();
-    await player.play(AssetSource(assetPath)); 
+    if (assetPath.contains("done.mp3")) {
+      // se for o som final, guarda a ref p/ poder parar
+      _donePlayer = player;
+    }
+    await player.play(AssetSource(assetPath));
     debugPrint("Tocando som: $assetPath");
   } catch (e) {
     debugPrint("Erro ao tocar som: $e");
   }
+}
+
+// Função para parar o som done
+void stopDoneSound() {
+  _donePlayer?.stop();
+  _donePlayer = null;
 }
 
 /// Tela inicial
@@ -128,10 +139,10 @@ class MenuScreen extends StatelessWidget {
                         crossAxisSpacing: 12,
                         childAspectRatio: 0.9,
                         children: [
-                          _eggOption(context, "Soft yolk egg", 1, "soft-egg.png"),
-                          _eggOption(context, "Medium yolk egg", 6, "medium-egg.png"),
-                          _eggOption(context, "Med/Hard yolk egg", 8, "medium-hard-egg.png"),
-                          _eggOption(context, "Hard yolk egg", 10, "hard-egg.png"),
+                          _eggOption(context, "Soft yolk egg", 5, "soft-egg.png"),
+                          _eggOption(context, "Medium yolk egg", 7, "medium-egg.png"),
+                          _eggOption(context, "Med/Hard yolk egg", 9, "medium-hard-egg.png"),
+                          _eggOption(context, "Hard yolk egg", 11, "hard-egg.png"),
                         ],
                       ),
                     ),
@@ -325,38 +336,35 @@ class EndScreen extends StatelessWidget {
                     const Text("Your egg is done!",
                         style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
                     const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () async {
-                            await playSound("sounds/click.mp3");
-                            Navigator.popUntil(context, (route) => route.isFirst);
-                          },
-                          child: Image.asset("assets/images/close.png", height: 50),
-                        ),
-                        const SizedBox(width: 18),
-                        GestureDetector(
-                          onTap: () async {
-                            await playSound("sounds/click.mp3");
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) =>
-                                      const TimerScreen(minutes: 1, title: "Snooze")),
-                            );
-                          },
-                          child: Image.asset("assets/images/snooze.png", height: 50),
-                        ),
-                      ],
-                    )
+                   Row(
+  mainAxisAlignment: MainAxisAlignment.center, // 👈 distribui melhor
+  children: [
+    GestureDetector(
+      onTap: () async {
+        stopDoneSound(); // 👈 para o som
+        await playSound("sounds/click.mp3");
+        Navigator.popUntil(context, (route) => route.isFirst);
+      },
+      child: Image.asset("assets/images/close.png", height: 30),
+    ),
+    GestureDetector(
+      onTap: () async {
+        stopDoneSound(); // 👈 para o som
+        await playSound("sounds/click.mp3");
+        Navigator.popUntil(context, (route) => route.isFirst);
+      },
+      child: Image.asset("assets/images/snooze.png", height: 30),
+    ),
+  ],
+),
+
                   ],
                 ),
               ),
             ),
             Positioned(
-              top: 16,
-              right: 16,
+              top: 36,
+              right: 46,
               child: GestureDetector(
                 onTap: () {
                   Navigator.pop(context);
